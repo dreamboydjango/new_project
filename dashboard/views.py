@@ -3,40 +3,56 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from marketplace.models import Product, Order, OrderItem
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F
 from django.db.models.functions import TruncMonth
 from .forms import ProductForm
 
-class SellerDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+
+# common statistics util for seller pages
+class SellerStatsMixin:
+    def get_seller(self):
+        return self.request.user
+
+    def get_products(self):
+        return Product.objects.filter(seller=self.get_seller())
+
+    def get_order_items(self):
+        return OrderItem.objects.filter(product__seller=self.get_seller())
+
+    def get_common_context(self):
+        seller = self.get_seller()
+        products = self.get_products()
+        order_items = self.get_order_items()
+        context = {
+            'total_products': products.count(),
+            'low_stock_products': products.filter(stock__lte=5).count(),
+            'total_revenue': order_items.aggregate(total=Sum('price'))['total'] or 0,
+            'total_orders': order_items.values('order').distinct().count(),
+        }
+        return context
+
+
+class SellerDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView, SellerStatsMixin):
     template_name = 'dashboard/seller_dashboard.html'
 
     def test_func(self):
-        return self.request.user.role == 'SELLER' or self.request.user.role == 'ADMIN'
+        return self.request.user.role in ('SELLER', 'ADMIN')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         seller = self.request.user
-        
-        # Statistics
-        products = Product.objects.filter(seller=seller)
-        context['total_products'] = products.count()
-        context['low_stock_products'] = products.filter(stock__lte=5).count()
-        
-        # Sales Analytics
-        order_items = OrderItem.objects.filter(product__seller=seller)
-        context['total_revenue'] = order_items.aggregate(total=Sum('price'))['total'] or 0
-        context['total_orders'] = order_items.values('order').distinct().count()
-        
-        # Recent Orders
+        # reuse common stats
+        context.update(self.get_common_context())
+
+        # Recent orders (last 5 items)
+        order_items = self.get_order_items()
         context['recent_order_items'] = order_items.select_related('order', 'order__buyer', 'product').order_by('-order__created_at')[:5]
-        
-        # Chart Data (Sales by Month)
+
+        # Sales by month for chart
         sales_data = order_items.annotate(month=TruncMonth('order__created_at')) \
             .values('month').annotate(total=Sum('price')).order_by('month')
-        
         context['chart_labels'] = [d['month'].strftime('%b %Y') for d in sales_data]
         context['chart_data'] = [float(d['total']) for d in sales_data]
-        
         return context
 
 class BuyerDashboardView(LoginRequiredMixin, ListView):
@@ -46,6 +62,79 @@ class BuyerDashboardView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Order.objects.filter(buyer=self.request.user).prefetch_related('items').order_by('-created_at')
+
+
+# lightweight placeholder views for additional dashboard pages
+class OrdersView(LoginRequiredMixin, UserPassesTestMixin, ListView, SellerStatsMixin):
+    model = Order
+    template_name = 'dashboard/orders.html'
+    context_object_name = 'orders'
+
+    def test_func(self):
+        return self.request.user.role in ('SELLER', 'ADMIN')
+
+    def get_queryset(self):
+        # annotate with total amount and item count for easier display
+        return Order.objects.filter(items__product__seller=self.request.user) \
+            .annotate(total_amount=Sum('items__price'), items_count=Count('items')) \
+            .distinct().order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_common_context())
+        return context
+
+
+class AnalyticsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView, SellerStatsMixin):
+    template_name = 'dashboard/analytics.html'
+
+    def test_func(self):
+        return self.request.user.role in ('SELLER', 'ADMIN')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_common_context())
+
+        order_items = self.get_order_items()
+        # sales by month
+        sales_data = order_items.annotate(month=TruncMonth('order__created_at')) \
+            .values('month').annotate(total=Sum('price')).order_by('month')
+        context['chart_labels'] = [d['month'].strftime('%b %Y') for d in sales_data]
+        context['chart_data'] = [float(d['total']) for d in sales_data]
+
+        # top products by quantity
+        top_products = order_items.values('product__name').annotate(
+            qty=Sum('quantity'), revenue=Sum('price')
+        ).order_by('-qty')[:5]
+        context['top_products'] = top_products
+
+        # orders by status counts
+        status_counts = order_items.values('order__status').annotate(count=Count('order', distinct=True))
+        # prepare lists for template JS to avoid inline template loops
+        context['status_counts'] = status_counts
+        context['status_labels'] = [s['order__status'] for s in status_counts]
+        context['status_values'] = [s['count'] for s in status_counts]
+        return context
+
+
+class InsightsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView, SellerStatsMixin):
+    template_name = 'dashboard/insights.html'
+
+    def test_func(self):
+        return self.request.user.role in ('SELLER', 'ADMIN')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_common_context())
+        products = self.get_products()
+        context['low_stock_items'] = products.filter(stock__lte=5).order_by('stock')
+
+        # revenue by category
+        category_revenue = self.get_order_items().annotate(
+            category=F('product__category__name')
+        ).values('category').annotate(total=Sum('price')).order_by('-total')
+        context['category_revenue'] = category_revenue
+        return context
 
 class ProductCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Product

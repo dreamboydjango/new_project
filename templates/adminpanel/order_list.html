@@ -28,8 +28,7 @@
                         {% for order in orders_list %}
                         <tr>
                             <td class="ps-4 fw-bold">
-                                <a href="{% url 'dashboard:order_detail' order.id %}" class="text-decoration-none">#{{
-                                    order.id }}</a>
+                                <a href="{% url 'dashboard:order_detail' order.id %}" class="text-decoration-none">#{{ order.id }}</a>
                             </td>
                             <td>{{ order.buyer.username }}</td>
                             <td class="fw-bold text-primary">${{ order.total_price }}</td>

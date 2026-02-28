@@ -1,0 +1,113 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Analytics - Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold">Analytics</h1>
+</div>
+
+<!-- summary cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 bg-primary text-white p-3">
+            <h6 class="small text-uppercase">Total Revenue</h6>
+            <h3 class="fw-bold mb-0">${{ total_revenue }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-success text-white p-3">
+            <h6 class="small text-uppercase">Total Orders</h6>
+            <h3 class="fw-bold mb-0">{{ total_orders }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-info text-white p-3">
+            <h6 class="small text-uppercase">Products</h6>
+            <h3 class="fw-bold mb-0">{{ total_products }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- charts -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h5 class="fw-bold mb-3">Revenue by Month</h5>
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h5 class="fw-bold mb-3">Top Products</h5>
+            <ul class="list-group">
+                {% for item in top_products %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ item.product__name }}
+                    <span class="badge bg-primary rounded-pill">{{ item.qty }}</span>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-center">No sales yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-4">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm p-4">
+            <h5 class="fw-bold mb-3">Order Status Breakdown</h5>
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- inject data into hidden script tags to avoid template tags inside JS -->
+{{ chart_labels|json_script:"chartLabels" }}
+{{ chart_data|json_script:"chartData" }}
+{{ status_labels|json_script:"statusLabels" }}
+{{ status_values|json_script:"statusValues" }}
+
+<script>
+// retrieve data from JSON script elements
+const labels = JSON.parse(document.getElementById('chartLabels').textContent);
+const revenueData = JSON.parse(document.getElementById('chartData').textContent);
+const statusLabels = JSON.parse(document.getElementById('statusLabels').textContent);
+const statusValues = JSON.parse(document.getElementById('statusValues').textContent);
+
+// revenue chart
+const revCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revCtx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Revenue',
+            data: revenueData,
+            borderColor: '#1e3a8a',
+            backgroundColor: 'rgba(30,58,138,0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+});
+
+// status pie
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+        labels: statusLabels,
+        datasets: [{
+            data: statusValues,
+            backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545','#6c757d']
+        }]
+    }
+});
+</script>
+{% endblock %}

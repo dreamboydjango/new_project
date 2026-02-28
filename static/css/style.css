@@ -44,12 +44,19 @@ body {
 }
 
 /* Sidebar for dashboards */
-#sidebar {
-    min-width: 250px;
-    max-width: 250px;
-    height: 100vh;
+.sidebar {
+    position: fixed;
+    top: 56px; /* offset to sit below the navbar */
+    left: 0;
+    width: 250px;
+    min-height: calc(100vh - 56px);
     background: white;
     box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+}
+
+/* main area to the right of a fixed sidebar */
+.dashboard-main {
+    margin-left: 250px;
 }
 
 .nav-link {

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if object %}Edit Category - {{ object.name }}{% else %}Add Category{% endif %} - Admin Panel
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">
+            {% if object %}Edit Category{% else %}Add Category{% endif %}
+        </h2>
+        <a href="{% url 'adminpanel:category_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Categories
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="mb-3">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                {{ form.name.errors }}
+            </div>
+            <div class="mb-3">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+            <button type="submit" class="btn btn-primary">
+                {% if object %}Update{% else %}Create{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

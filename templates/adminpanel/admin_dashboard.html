@@ -53,6 +53,15 @@
             </a>
         </div>
         <div class="col-md-3">
+            <a href="{% url 'adminpanel:category_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm p-4 text-center admin-stat-card">
+                    <i class="bi bi-tags fs-1 text-secondary mb-2"></i>
+                    <h2 class="fw-bold mb-0 text-dark">{{ total_categories }}</h2>
+                    <p class="text-muted small text-uppercase mb-0">Categories</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
             <a href="{% url 'adminpanel:order_list' %}" class="text-decoration-none">
                 <div class="card border-0 shadow-sm p-4 text-center admin-stat-card">
                     <i class="bi bi-cart-check fs-1 text-warning mb-2"></i>

@@ -1,0 +1,84 @@
+:root {
+    --primary-blue: #1e3a8a;
+    --secondary-green: #10b981;
+    --accent-orange: #f59e0b;
+    --neutral-gray: #f3f4f6;
+    --text-dark: #1f2937;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f9fafb;
+    color: var(--text-dark);
+}
+
+.navbar {
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.hero-gradient {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #3b82f6 100%);
+    color: white;
+    padding: 6rem 0;
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.btn-success {
+    background-color: var(--secondary-green);
+    border-color: var(--secondary-green);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Sidebar for dashboards */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+}
+
+.nav-link {
+    color: var(--text-dark);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link:hover, .nav-link.active {
+    background-color: var(--neutral-gray);
+    color: var(--primary-blue);
+}
+
+/* Ripple effect (simplified) */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Skeleton loader */
+.skeleton {
+    background: #e5e7eb;
+    background-image: linear-gradient(90deg, #e5e7eb 0px, #f3f4f6 40px, #e5e7eb 80px);
+    background-size: 600px;
+    animation: skeleton-loading 1.6s infinite linear;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: -100px; }
+    100% { background-position: 500px; }
+}

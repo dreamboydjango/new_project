@@ -9,8 +9,10 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # apply consistent styling and strip default Django help_text
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
+            field.help_text = ''
 
 class CustomAuthenticationForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):

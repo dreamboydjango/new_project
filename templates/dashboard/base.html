@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        {% if request.user.is_authenticated %}
+            {% if request.user.role == 'SELLER' or request.user.role == 'ADMIN' %}
+        <nav class="col-md-2 d-none d-md-block sidebar py-4">
+            <div class="position-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'seller_dashboard' %}active fw-bold{% endif %}" href="{% url 'dashboard:seller_dashboard' %}">
+                            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'seller_products' %}active{% endif %}" href="{% url 'dashboard:seller_products' %}">
+                            <i class="bi bi-box-seam me-2"></i> My Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'orders' %}active{% endif %}" href="{% url 'dashboard:orders' %}">
+                            <i class="bi bi-cart-check me-2"></i> Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}" href="{% url 'dashboard:analytics' %}">
+                            <i class="bi bi-graph-up me-2"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase small">
+                            <span>Business Support</span>
+                        </h6>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'insights' %}active{% endif %}" href="{% url 'dashboard:insights' %}">
+                            <i class="bi bi-lightbulb me-2"></i> Insights
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+            {% endif %}
+        {% endif %}
+
+        <!-- Main Content -->
+        <main class="dashboard-main col-md-10 ms-sm-auto px-md-4 py-4">
+            {% block dashboard_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}

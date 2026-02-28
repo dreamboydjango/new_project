@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Category - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card border-0 shadow-sm p-4">
+        <h3 class="mb-4">Delete Category</h3>
+        <p>Are you sure you want to delete the category "{{ object.name }}"?</p>
+        <form method="post">
+            {% csrf_token %}
+            <a href="{% url 'adminpanel:category_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
