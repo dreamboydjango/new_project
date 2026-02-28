@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Micro Market{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-stat-card {
+        transition: transform 0.2s;
+    }
+
+    .admin-stat-card:hover {
+        transform: translateY(-5px);
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h1 class="fw-bold">Platform Administration</h1>
+        <div class="d-flex gap-2">
+            <span class="badge bg-primary rounded-pill px-3 py-2">System Active</span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <a href="{% url 'adminpanel:user_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm p-4 text-center admin-stat-card">
+                    <i class="bi bi-people fs-1 text-primary mb-2"></i>
+                    <h2 class="fw-bold mb-0 text-dark">{{ total_users }}</h2>
+                    <p class="text-muted small text-uppercase mb-0">Total Users</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'adminpanel:seller_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm p-4 text-center admin-stat-card">
+                    <i class="bi bi-shop fs-1 text-success mb-2"></i>
+                    <h2 class="fw-bold mb-0 text-dark">{{ total_sellers }}</h2>
+                    <p class="text-muted small text-uppercase mb-0">Active Sellers</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'adminpanel:product_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm p-4 text-center admin-stat-card">
+                    <i class="bi bi-box fs-1 text-info mb-2"></i>
+                    <h2 class="fw-bold mb-0 text-dark">{{ total_products }}</h2>
+                    <p class="text-muted small text-uppercase mb-0">Products Listing</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'adminpanel:order_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm p-4 text-center admin-stat-card">
+                    <i class="bi bi-cart-check fs-1 text-warning mb-2"></i>
+                    <h2 class="fw-bold mb-0 text-dark">{{ total_orders }}</h2>
+                    <p class="text-muted small text-uppercase mb-0">Total Orders</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Management Table -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">New User Signups</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Joined Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-circle p-2 me-2">
+                                                <i class="bi bi-person text-primary"></i>
+                                            </div>
+                                            <span>{{ user.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ user.get_role_display }}</span>
+                                    </td>
+                                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Alerts -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-4">System Overview</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Database Status
+                        <span class="text-success small fw-bold">Connected</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Storage Usage
+                        <span class="text-primary small fw-bold">12% used</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Server Load
+                        <span class="text-success small fw-bold">Low</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

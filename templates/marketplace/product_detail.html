@@ -1,0 +1,111 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Micro Market{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'marketplace:product_list' %}">Marketplace</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-md-6 mb-4">
+            <div class="card overflow-hidden shadow-sm border-0">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="min-height: 400px;">
+                    <span class="text-muted fs-4">No Image Available</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-md-6">
+            <div class="ps-md-4">
+                <span class="badge bg-soft-primary text-primary mb-2 px-3 py-2 rounded-pill"
+                    style="background-color: var(--neutral-gray);">
+                    {{ product.category.name }}
+                </span>
+                <h1 class="fw-bold display-5 mb-3">{{ product.name }}</h1>
+
+                <div class="d-flex align-items-center mb-4">
+                    <span class="fs-2 fw-bold text-primary">${{ product.price }}</span>
+                    {% if product.stock > 0 %}
+                    <span class="badge bg-success ms-3">In Stock ({{ product.stock }})</span>
+                    {% else %}
+                    <span class="badge bg-danger ms-3">Out of Stock</span>
+                    {% endif %}
+                </div>
+
+                <div class="card bg-light border-0 p-3 mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm me-3">
+                            <i class="bi bi-shop text-primary fs-3"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Sold by {{ product.seller.username }}</h6>
+                            <p class="text-muted small mb-0">{{ product.seller.city }}, {{ product.seller.state }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-muted lead mb-5">{{ product.description }}</p>
+
+                <div class="d-grid gap-2">
+                    <form action="{% url 'marketplace:add_to_cart' product.id %}" method="POST" class="d-grid">
+                        {% csrf_token %}
+                        {% if product.stock == 0 %}
+                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold" disabled>
+                            <i class="bi bi-cart-plus me-2"></i> Add to Cart (Out of Stock)
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold">
+                            <i class="bi bi-cart-plus me-2"></i> Add to Cart
+                        </button>
+                        {% endif %}
+                    </form>
+
+                    <form action="{% url 'marketplace:add_to_wishlist' product.id %}" method="POST" class="d-grid">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary btn-lg py-3 fw-bold">
+                            <i class="bi bi-heart me-2"></i> Add to Wishlist
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="mt-5 pt-5">
+        <h3 class="fw-bold mb-4">Related Products</h3>
+        <div class="row g-4">
+            {% for rel in related_products %}
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm border-0">
+                    {% if rel.image %}
+                    <img src="{{ rel.image.url }}" class="card-img-top" alt="{{ rel.name }}"
+                        style="height: 180px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">{{ rel.name }}</h6>
+                        <p class="text-primary fw-bold mb-0">${{ rel.price }}</p>
+                        <a href="{% url 'marketplace:product_detail' rel.id %}" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

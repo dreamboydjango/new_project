@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Explore Products - Micro Market{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card p-3 shadow-sm border-0 sticky-top" style="top: 100px;">
+                <h5 class="fw-bold mb-3">Filters</h5>
+
+                <form method="get" action="{% url 'marketplace:product_list' %}">
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <label class="form-label small text-muted text-uppercase fw-bold">Search</label>
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" placeholder="Search products..."
+                                value="{{ request.GET.q }}">
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Categories -->
+                    <div class="mb-4">
+                        <label class="form-label small text-muted text-uppercase fw-bold">Categories</label>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'marketplace:product_list' %}"
+                                class="list-group-item list-group-item-action {% if not request.GET.category %}active{% endif %}">
+                                All Categories
+                            </a>
+                            {% for cat in categories %}
+                            <a href="?category={{ cat.slug }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                                class="list-group-item list-group-item-action {% if request.GET.category == cat.slug %}active{% endif %}">
+                                {{ cat.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <a href="{% url 'marketplace:product_list' %}"
+                        class="btn btn-link btn-sm text-decoration-none p-0 text-muted">Clear All Filters</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold m-0">
+                    {% if request.GET.category %}
+                    Category: {{ request.GET.category|title }}
+                    {% elif request.GET.q %}
+                    Search Results for "{{ request.GET.q }}"
+                    {% else %}
+                    All Products
+                    {% endif %}
+                </h2>
+                <span class="text-muted">{{ products.count }} products found</span>
+            </div>
+
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
+                            style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <span class="text-muted">No Image</span>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <span class="badge bg-light text-primary mb-2">{{ product.category.name }}</span>
+                            <h5 class="card-title fw-bold mb-1">{{ product.name }}</h5>
+                            <p class="text-muted small mb-3">by {{ product.seller.username }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary fs-5">${{ product.price }}</span>
+                                <a href="{% url 'marketplace:product_detail' product.id %}"
+                                    class="btn btn-primary btn-sm px-3">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <div class="py-5">
+                        <i class="bi bi-box-seam fs-1 text-muted"></i>
+                        <h4 class="mt-3">No products found</h4>
+                        <p class="text-muted">Try adjusting your filters or search query.</p>
+                        <a href="{% url 'marketplace:product_list' %}" class="btn btn-primary">Clear FIlters</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Seller Dashboard - Micro Market{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dash-card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .dash-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar {
+        background-color: white;
+        min-height: calc(100vh - 70px);
+        border-right: 1px solid #eee;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block sidebar py-4">
+            <div class="position-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" href="#">
+                            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:seller_products' %}">
+                            <i class="bi bi-box-seam me-2"></i> My Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-cart-check me-2"></i> Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-graph-up me-2"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <h6
+                            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase small">
+                            <span>Business Support</span>
+                        </h6>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-lightbulb me-2"></i> Insights
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 fw-bold">Seller Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{% url 'dashboard:add_product' %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i> Add New Product
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card dash-card border-0 bg-primary text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase small mb-1">Total Revenue</h6>
+                                <h3 class="fw-bold mb-0">${{ total_revenue }}</h3>
+                            </div>
+                            <i class="bi bi-currency-dollar fs-1 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card dash-card border-0 bg-success text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase small mb-1">Total Orders</h6>
+                                <h3 class="fw-bold mb-0">{{ total_orders }}</h3>
+                            </div>
+                            <i class="bi bi-bag-check fs-1 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'dashboard:seller_products' %}" class="text-decoration-none">
+                        <div class="card dash-card border-0 bg-info text-white p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-uppercase small mb-1">Total Products</h6>
+                                    <h3 class="fw-bold mb-0">{{ total_products }}</h3>
+                                </div>
+                                <i class="bi bi-box fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Sales Chart -->
+                <div class="col-md-8 mb-4">
+                    <div class="card border-0 shadow-sm p-4 h-100">
+                        <h5 class="fw-bold mb-4">Sales Performance</h5>
+                        <div class="chart-container">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Insights -->
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm p-4 h-100">
+                        <h5 class="fw-bold mb-3">AI Business Insights</h5>
+                        <div class="alert alert-info border-0 shadow-sm mb-3">
+                            <h6 class="fw-bold mb-1">Growth Opportunity</h6>
+                            <p class="small mb-0">Your "Handicrafts" category saw a 20% increase this month. Consider
+                                adding more similar items.</p>
+                        </div>
+                        <div class="alert alert-warning border-0 shadow-sm">
+                            <h6 class="fw-bold mb-1">Stock Alert</h6>
+                            <p class="small mb-0">3 products are nearly out of stock. Restock soon to avoid losing
+                                sales.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Recent Orders</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in recent_order_items %}
+                                <tr>
+                                    <td>#{{ item.order.id }}</td>
+                                    <td>{{ item.order.buyer.username }}</td>
+                                    <td>{{ item.product.name }}</td>
+                                    <td class="fw-bold">${{ item.price }}</td>
+                                    <td>
+                                        <span class="badge bg-soft-primary text-primary">
+                                            {{ item.order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.order.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">No recent orders.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels| safe }},
+        datasets: [{
+            label: 'Revenue ($)',
+            data: {{ chart_data| safe }},
+        borderColor: '#1e3a8a',
+        backgroundColor: 'rgba(30, 58, 138, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { display: false }
+            },
+            x: {
+                grid: { display: false }
+            }
+        }
+    }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.id }} Details - Micro Market{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold m-0">Order #{{ order.id }} Details</h2>
+                {% if user.role == 'ADMIN' %}
+                <a href="{% url 'adminpanel:order_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Orders
+                </a>
+                {% else %}
+                <a href="{% url 'dashboard:buyer_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> My Orders
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-3">Order Information</h5>
+                        <p class="mb-1 text-muted small text-uppercase">Date Placed</p>
+                        <p class="mb-3">{{ order.created_at|date:"F d, Y at H:i" }}</p>
+
+                        <p class="mb-1 text-muted small text-uppercase">Status</p>
+                        <p class="mb-0">
+                            <span class="badge 
+                                {% if order.status == 'DELIVERED' %}bg-success
+                                {% elif order.status == 'CANCELLED' %}bg-danger
+                                {% else %}bg-primary{% endif %} fs-6">
+                                {{ order.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                    {% if user.role == 'ADMIN' %}
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-3">Customer Information</h5>
+                        <p class="mb-1 text-muted small text-uppercase">Username</p>
+                        <p class="mb-3">{{ order.buyer.username }}</p>
+                        <p class="mb-1 text-muted small text-uppercase">Email</p>
+                        <p class="mb-0">{{ order.buyer.email }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3">Product</th>
+                                <th class="py-3">Seller</th>
+                                <th class="py-3 text-center">Quantity</th>
+                                <th class="py-3 text-end pe-4">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td class="ps-4 py-4">
+                                    <div class="d-flex align-items-center">
+                                        {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" class="rounded me-3"
+                                            style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
+                                            style="width: 50px; height: 50px;">
+                                            <i class="bi bi-box text-muted"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="fw-bold mb-0">
+                                                <a href="{% url 'marketplace:product_detail' item.product.id %}"
+                                                    class="text-decoration-none text-dark">
+                                                    {{ item.product.name }}
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">{{ item.product.category.name }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.product.seller.username }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end pe-4 fw-bold text-primary">${{ item.price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <td colspan="3" class="text-end fw-bold py-3">Total Amount</td>
+                                <td class="text-end pe-4 fw-bold text-primary fs-5 py-3">${{ order.total_price }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
